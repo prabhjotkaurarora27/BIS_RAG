@@ -190,7 +190,10 @@ bis-standard-finder/
 
 ## 👥 Team
 
-*Add your team name and members here*
+PRABHJOT KAUR
+HARPREET KAUR
+HIMANSHI TREHAN 
+SUKHPREET KAUR
 
 ---
 
