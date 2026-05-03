@@ -190,13 +190,10 @@ bis-standard-finder/
 
 ## 👥 Team
 
-PRABHJOT KAUR
-HARPREET KAUR
-HIMANSHI TREHAN 
+PRABHJOT KAUR,
+HARPREET KAUR,
+HIMANSHI TREHAN ,
 SUKHPREET KAUR
 
 ---
 
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) for details.
