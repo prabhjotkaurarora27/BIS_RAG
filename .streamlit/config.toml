@@ -1,0 +1,11 @@
+[browser]
+gatherUsageStats = false
+
+[runner]
+magicEnabled = true
+
+[server]
+headless = true
+
+[client]
+showErrorDetails = true

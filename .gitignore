@@ -1,0 +1,11 @@
+.env
+venv/
+__pycache__/
+*.pyc
+*.pyo
+data/faiss.index
+data/chunks.pkl
+data/chunks.json
+data/bis_sp21.pdf
+*.pdf
+.DS_Store
