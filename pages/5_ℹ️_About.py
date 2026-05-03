@@ -190,13 +190,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 ev1, ev2, ev3, ev4 = st.columns(4)
-ev1.metric(label="✅ Hit Rate @3",  value="100%", delta="Target: >80%",
+ev1.metric(label="✅ Hit Rate @3",  value="100%", delta="Target: >80% ✅",
            help="At least 1 correct standard in top-3 results for every query")
-ev2.metric(label="🎯 MRR @5",       value="0.93",  delta="Target: >0.70",
+ev2.metric(label="🎯 MRR @5",       value="0.95",  delta="Target: >0.70 ✅",
            help="Mean Reciprocal Rank — how high the first correct result appears")
-ev3.metric(label="⚡ Avg Latency",  value="3.4s",  delta="Target: <5s",
-           help="End-to-end pipeline latency including LLM reranking")
-ev4.metric(label="📦 IS Standards", value="820+",  delta="Indexed from SP 21",
+ev3.metric(label="⚡ Avg Latency",  value="15.2s",  delta="Incl. LLM calls",
+           help="End-to-end latency including query expansion + reranking via Groq API")
+ev4.metric(label="📦 IS Standards", value="820",  delta="Indexed from SP 21",
            help="Total BIS IS standards in the FAISS + BM25 index")
 
 st.markdown("<br>", unsafe_allow_html=True)
