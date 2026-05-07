@@ -1,11 +1,25 @@
+# Environment & secrets
 .env
+
+# Virtual environment
 venv/
+
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
+
+# Large generated data files (must be built locally — see README)
 data/faiss.index
 data/chunks.pkl
 data/chunks.json
-data/bis_sp21.pdf
+data/embeddings/
+
+# PDF files (large, cannot be distributed)
 *.pdf
+
+# macOS
 .DS_Store
+
+# Streamlit cache
+.streamlit/secrets.toml

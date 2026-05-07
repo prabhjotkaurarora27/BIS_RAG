@@ -55,7 +55,26 @@ st.divider()
 chunks = load_chunks()
 
 if not chunks:
-    st.error("Data not found. Run `python3 src/ingest.py` first.")
+    st.error("⚠️ Data not found — the index has not been built yet.")
+    st.markdown("""
+### 🔧 One-time Setup Required
+
+This app needs a pre-built index to work. Run these commands **once** from the project root:
+
+```bash
+# Step 1 — Parse the BIS SP 21 PDF into structured chunks
+python3 src/ingest.py --pdf data/raw/bis_sp21.pdf
+
+# Step 2 — Build the FAISS vector index (takes ~2–5 mins)
+python3 src/embed.py
+
+# Step 3 — Restart the Streamlit app
+streamlit run app.py
+```
+
+> 📄 **You need the BIS SP 21 PDF** placed at `data/raw/bis_sp21.pdf`
+> Get a free Groq API key at [console.groq.com](https://console.groq.com) and add it to `.env`
+""")
     st.stop()
 
 # Add category to each chunk

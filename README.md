@@ -14,14 +14,150 @@ India's BIS SP 21 handbook spans **929 pages** with **820+ IS standards**. Small
 
 ---
 
-## 🚀 Live Demo
+## 🚀 Quick Start (Full Setup for New Clones)
+
+Follow every step in order. **All commands must be run from the project root folder.**
+
+### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/bis-standard-finder.git
-cd bis-standard-finder
+git clone https://github.com/prabhjotkaurarora27/BIS_RAG.git
+cd BIS_RAG
+```
+
+### Step 2 — Create and activate a virtual environment
+
+```bash
+python3 -m venv venv
+
+# On macOS / Linux:
+source venv/bin/activate
+
+# On Windows:
+venv\Scripts\activate
+```
+
+> ✅ You should see `(venv)` in your terminal prompt after activation.
+
+### Step 3 — Install dependencies
+
+```bash
 pip install -r requirements.txt
+```
+
+> ⏳ This takes 2–3 minutes. It downloads PyMuPDF, FAISS, sentence-transformers, and Groq.
+
+### Step 4 — Add your Groq API key
+
+```bash
+cp .env.example .env
+```
+
+Now open the `.env` file and replace the placeholder with your actual key:
+
+```
+GROQ_API_KEY=gsk_your_actual_key_here
+```
+
+> 🔑 Get a **free** Groq API key at [console.groq.com](https://console.groq.com) — takes 1 minute.
+
+### Step 5 — Add the BIS SP 21 PDF
+
+Place the BIS SP 21 PDF at exactly this path inside the project folder:
+
+```
+data/raw/bis_sp21.pdf
+```
+
+> 📄 The PDF must be named `bis_sp21.pdf` and placed inside the `data/raw/` folder.
+
+### Step 6 — Parse the PDF (one-time, ~1–2 min)
+
+```bash
+python3 src/ingest.py --pdf data/raw/bis_sp21.pdf
+```
+
+This reads all 929 pages and extracts 820+ IS standard entries into `data/chunks.json`.
+
+### Step 7 — Build the FAISS vector index (one-time, ~3–5 min)
+
+```bash
+python3 src/embed.py
+```
+
+This creates the semantic search index (`data/faiss.index`) and saves chunks to `data/chunks.pkl`.
+
+### Step 8 — Run the app ✅
+
+```bash
 streamlit run app.py
 ```
+
+Open your browser at **http://localhost:8501**
+
+---
+
+## 📋 Command Summary (Quick Reference)
+
+```bash
+# 1. Clone & enter project
+git clone https://github.com/prabhjotkaurarora27/BIS_RAG.git
+cd BIS_RAG
+
+# 2. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# 3. Install packages
+pip install -r requirements.txt
+
+# 4. Set up API key
+cp .env.example .env
+# ✏️  Edit .env → add your GROQ_API_KEY
+
+# 5. Add PDF → data/raw/bis_sp21.pdf
+
+# 6. Build index (run once)
+python3 src/ingest.py --pdf data/raw/bis_sp21.pdf
+python3 src/embed.py
+
+# 7. Launch
+streamlit run app.py
+```
+
+---
+
+## 🔁 After First Setup — How to Run Again
+
+If you've already done the setup, just activate your environment and run the app:
+
+```bash
+source venv/bin/activate        # Windows: venv\Scripts\activate
+streamlit run app.py
+```
+
+> You do **not** need to re-run `ingest.py` or `embed.py` again unless you change the PDF.
+
+---
+
+## 📊 Evaluation
+
+Evaluated on the **public test set (10 queries)** using the organizer-provided `eval_script.py`:
+
+| Metric | Score | Hackathon Target |
+|--------|-------|-----------------|
+| **Hit Rate @3** | **100%** | > 80% ✅ |
+| **MRR @5** | **0.93** | > 0.70 ✅ |
+| **Avg Latency** | **~3.4s** | < 5s ✅ |
+
+### Reproduce evaluation results
+
+```bash
+python3 inference.py --input data/public_test_set.json --output data/public_results.json
+python3 eval_script.py --results data/public_results.json
+```
+
+Results file: `data/public_results.json`
 
 ---
 
@@ -57,7 +193,7 @@ Instead of fixed weights, the system adapts based on query type:
 | Long / descriptive (`≥ 4 words`) | `"33 grade ordinary portland cement physical requirements"` | **70%** | 30% |
 
 ### 2. LLM Query Expansion
-Before retrieval, Groq LLM expands vague queries into technical BIS terminology — improving recall for non-expert users who don't know the exact standard vocabulary.
+Before retrieval, Groq LLM expands vague queries into technical BIS terminology — improving recall for non-expert users.
 
 ### 3. Anti-Hallucination Enforcement
 The LLM reranker is strictly constrained to only cite IS numbers present in the retrieved context. A post-processing validation step further filters any hallucinated IDs.
@@ -67,72 +203,15 @@ Every result shows its **FAISS score**, **BM25 score**, and **hybrid score** —
 
 ---
 
-## 📊 Evaluation Results
-
-Evaluated on the **public test set (10 queries)** using the organizer-provided `eval_script.py`:
-
-| Metric | Score | Hackathon Target |
-|--------|-------|-----------------|
-| **Hit Rate @3** | **100%** | > 80% ✅ |
-| **MRR @5** | **0.93** | > 0.70 ✅ |
-| **Avg Latency** | **~3.4s** | < 5s ✅ |
-
-Results file: `data/public_results.json`
-
-To reproduce:
-```bash
-python inference.py --input data/public_test_set.json --output data/public_results.json
-python eval_script.py --results data/public_results.json
-```
-
----
-
-## ⚙️ Setup
-
-### 1. Clone and install
-```bash
-git clone https://github.com/YOUR_USERNAME/bis-standard-finder.git
-cd bis-standard-finder
-python -m venv venv
-source venv/bin/activate       # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### 2. Add your Groq API key
-```bash
-cp .env.example .env
-# Edit .env and paste your key:
-# GROQ_API_KEY=gsk_your_key_here
-```
-Get a free key at [console.groq.com](https://console.groq.com)
-
-### 3. Add the BIS SP 21 dataset
-```
-data/raw/bis_sp21.pdf
-```
-
-### 4. Build the FAISS index (one-time, ~5 mins)
-```bash
-python src/ingest.py --pdf data/raw/bis_sp21.pdf    # Parse PDF → chunks
-python src/embed.py                                   # Build FAISS index
-```
-
-### 5. Run the app
-```bash
-streamlit run app.py
-```
-
----
-
 ## 📁 Project Structure
 
 ```
-bis-standard-finder/
+BIS_RAG/
 ├── app.py                      # Streamlit entry point
 ├── inference.py                # ⚖️ Judge entry point — DO NOT MODIFY
 ├── eval_script.py              # ⚖️ Organizer evaluation script — DO NOT MODIFY
-├── requirements.txt
-├── .env.example                # Safe API key template
+├── requirements.txt            # Python dependencies
+├── .env.example                # Safe API key template (copy to .env)
 ├── .gitignore
 │
 ├── src/
@@ -140,7 +219,7 @@ bis-standard-finder/
 │   ├── embed.py                # BGE embedding + FAISS index builder
 │   ├── chunking.py             # Text chunking logic
 │   ├── retriever.py            # 🔍 Dynamic hybrid retriever (FAISS + BM25)
-│   ├── generator.py            # 🤖 Groq LLM — query expansion, reranking, descriptions
+│   ├── generator.py            # 🤖 Groq LLM — query expansion, reranking
 │   └── pipeline.py             # End-to-end pipeline glue
 │
 ├── pages/
@@ -154,9 +233,16 @@ bis-standard-finder/
 │   └── main.css                # Global design system (saffron/navy theme)
 │
 └── data/
+    ├── raw/
+    │   └── bis_sp21.pdf        # ⬅️ Add this manually (not in repo)
+    ├── chunks.json             # Generated by ingest.py (not in repo)
+    ├── faiss.index             # Generated by embed.py (not in repo)
+    ├── chunks.pkl              # Generated by embed.py (not in repo)
     ├── public_test_set.json    # 10 public evaluation queries
     └── public_results.json     # ✅ Our results on public test set
 ```
+
+> **Note:** Files marked "not in repo" are gitignored (large binary/generated files). You must generate them locally by following the setup steps above.
 
 ---
 
@@ -181,10 +267,22 @@ bis-standard-finder/
 - 💡 **Query Expansion** — LLM enriches vague queries before retrieval
 - 🤖 **AI Rationale** — Explains *why* each standard applies, in plain English
 - 🔬 **Explainability Panel** — Shows FAISS, BM25, and hybrid scores per result
-- 💬 **Conversational Chatbot** — Multi-turn Q&A about BIS standards and construction
+- 💬 **Conversational Chatbot** — Multi-turn Q&A about BIS standards
 - 📖 **Browse Database** — Filter and explore all 820+ indexed standards
 - 📄 **Download Report** — One-click compliance report as `.txt` or `.csv`
 - 🏷️ **Category Tags** — Auto-tagged by material type (Cement, Steel, Aggregates…)
+
+---
+
+## ❓ Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `ModuleNotFoundError` | Make sure `(venv)` is active: `source venv/bin/activate` |
+| `Data not found` error in app | Run `python3 src/ingest.py --pdf data/raw/bis_sp21.pdf` then `python3 src/embed.py` |
+| `GROQ_API_KEY not set` | Add your key to `.env` (copy from `.env.example`) |
+| PDF not found | Place `bis_sp21.pdf` at `data/raw/bis_sp21.pdf` |
+| Port 8501 in use | Run `streamlit run app.py --server.port 8502` |
 
 ---
 
@@ -192,8 +290,5 @@ bis-standard-finder/
 
 PRABHJOT KAUR,
 HARPREET KAUR,
-HIMANSHI TREHAN ,
+HIMANSHI TREHAN,
 SUKHPREET KAUR
-
----
-

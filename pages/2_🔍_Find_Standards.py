@@ -314,7 +314,16 @@ if should_search:
             elapsed = time.time() - start
             st.session_state.search_results = (details, elapsed, active_query)
         except FileNotFoundError:
-            st.error("⚠️ Index not found. Run `python3 src/embed.py` first.")
+            st.error("⚠️ Index not found — the FAISS index has not been built yet.")
+            st.markdown("""
+**Run these commands once from the project root:**
+```bash
+python3 src/ingest.py --pdf data/raw/bis_sp21.pdf   # Parse PDF → chunks
+python3 src/embed.py                                  # Build FAISS index
+streamlit run app.py                                  # Restart app
+```
+> You need the BIS SP 21 PDF at `data/raw/bis_sp21.pdf` and a Groq API key in `.env`
+""")
         except Exception as e:
             st.error(f"Error: {e}")
 elif search_clicked:
