@@ -16,7 +16,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GROQ_MODEL = "llama-3.1-8b-instant"
+GROQ_MODELS = [
+    os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"),
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+]
 
 
 def get_client() -> Groq:
@@ -30,6 +37,30 @@ def get_client() -> Groq:
     if not api_key:
         raise ValueError("GROQ_API_KEY not set. Add it to your .env file or Streamlit secrets.")
     return Groq(api_key=api_key)
+
+
+def completion_with_fallback(client: Groq, messages: list[dict], temperature: float = 0.0, max_tokens: int = 800):
+    """Try models in priority order, falling back if a model is deprecated or not found."""
+    last_err = None
+    seen = set()
+    for model in GROQ_MODELS:
+        if model in seen:
+            continue
+        seen.add(model)
+        try:
+            return client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            if "model" in err_str and ("not found" in err_str or "does not exist" in err_str or "decommissioned" in err_str or "404" in err_str):
+                continue
+            raise e
+    raise last_err
 
 
 def expand_query(query: str) -> str:
@@ -48,8 +79,8 @@ def expand_query(query: str) -> str:
             "Return ONLY the expanded search string — no explanation, no bullet points:\n\n"
             f"{query}"
         )
-        response = client.chat.completions.create(
-            model=GROQ_MODEL,
+        response = completion_with_fallback(
+            client=client,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
             max_tokens=150,
@@ -116,8 +147,8 @@ INSTRUCTIONS:
     client = get_client()
 
     try:
-        response = client.chat.completions.create(
-            model=GROQ_MODEL,
+        response = completion_with_fallback(
+            client=client,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,
             max_tokens=800,
@@ -180,8 +211,8 @@ Return ONLY the description text, no preamble."""
 
     try:
         client = get_client()
-        response = client.chat.completions.create(
-            model=GROQ_MODEL,
+        response = completion_with_fallback(
+            client=client,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
             max_tokens=200,

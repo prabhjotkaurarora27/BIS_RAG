@@ -233,15 +233,38 @@ def get_groq_response(messages: list[dict]) -> str:
             pass
     if not api_key:
         return "⚠️ GROQ_API_KEY not set. Please add it to your .env file or Streamlit secrets."
+    models_to_try = [
+        os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"),
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "qwen/qwen3.8-27b",
+        "llama-3.3-70b-versatile",
+        "llama-3.1-8b-instant",
+    ]
+
     try:
         client = Groq(api_key=api_key)
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=messages,
-            temperature=0.5,
-            max_tokens=1200,
-        )
-        return response.choices[0].message.content.strip()
+        last_err = None
+        seen = set()
+        for model_name in models_to_try:
+            if model_name in seen:
+                continue
+            seen.add(model_name)
+            try:
+                response = client.chat.completions.create(
+                    model=model_name,
+                    messages=messages,
+                    temperature=0.5,
+                    max_tokens=1200,
+                )
+                return response.choices[0].message.content.strip()
+            except Exception as e:
+                last_err = e
+                err_str = str(e).lower()
+                if "model" in err_str and ("not found" in err_str or "does not exist" in err_str or "decommissioned" in err_str or "404" in err_str):
+                    continue
+                return f"⚠️ Error reaching AI: {e}"
+        return f"⚠️ Error reaching AI: {last_err}"
     except Exception as e:
         return f"⚠️ Error reaching AI: {e}"
 
