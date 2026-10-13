@@ -226,7 +226,13 @@ def get_groq_response(messages: list[dict]) -> str:
     """Call Groq API with full conversation history."""
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        return "⚠️ GROQ_API_KEY not set. Please add it to your .env file."
+        try:
+            import streamlit as st
+            api_key = st.secrets.get("GROQ_API_KEY")
+        except Exception:
+            pass
+    if not api_key:
+        return "⚠️ GROQ_API_KEY not set. Please add it to your .env file or Streamlit secrets."
     try:
         client = Groq(api_key=api_key)
         response = client.chat.completions.create(

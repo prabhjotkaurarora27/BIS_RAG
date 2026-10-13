@@ -9,10 +9,7 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Large generated data files (must be built locally — see README)
-data/faiss.index
-data/chunks.pkl
-data/chunks.json
+# Large generated data files
 data/embeddings/
 
 # PDF files (large, cannot be distributed)
